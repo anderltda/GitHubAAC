@@ -4,6 +4,7 @@ import anderltda.com.br.githubaac.data.local.dao.UserDao
 import anderltda.com.br.githubaac.data.local.entity.User
 import anderltda.com.br.githubaac.data.remote.UserWebService
 import android.arch.lifecycle.LiveData
+import android.util.Log
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,7 +25,9 @@ constructor(private val webservice: UserWebService, private val userDao: UserDao
     private fun refreshUser(userLogin: String) {
         executor.execute {
 
-            val userExists = userDao.hasUser(userLogin, getMaxRefreshTime(Date())) != null
+            var usr = userDao.hasUser(userLogin, getMaxRefreshTime(Date()))
+
+            val userExists = (usr != null)
 
             if (!userExists) {
                 webservice.getUser(userLogin).enqueue(object : Callback<User> {
@@ -32,13 +35,22 @@ constructor(private val webservice: UserWebService, private val userDao: UserDao
                         executor.execute {
                             val user = response.body()
                             user?.lastRefresh = Date()
-                            if (user != null)
+                            if (user != null) {
+                                Log.w(" USUARIO FOUND GIT ", userLogin)
                                 userDao.save(user)
+                            } else {
+                                Log.w(" USUARIO NOT FOUND GIT ", userLogin)
+                            }
+
                         }
                     }
 
-                    override fun onFailure(call: Call<User>, t: Throwable) {}
+                    override fun onFailure(call: Call<User>, t: Throwable) {
+                        Log.e("onFailure", t.message)
+                    }
                 })
+            } else {
+                Log.i(" USER FOUND DATABASE ", userExists.toString())
             }
         }
     }
@@ -46,12 +58,11 @@ constructor(private val webservice: UserWebService, private val userDao: UserDao
     private fun getMaxRefreshTime(currentDate: Date): Date {
         val cal = Calendar.getInstance()
         cal.time = currentDate
-        cal.add(Calendar.MINUTE, -FRESH_TIMEOUT_IN_MINUTES)
+        cal.add(Calendar.MINUTE, - FRESH_TIMEOUT_IN_MINUTES)
         return cal.time
     }
 
     companion object {
-
         private const val FRESH_TIMEOUT_IN_MINUTES = 3
     }
 }
