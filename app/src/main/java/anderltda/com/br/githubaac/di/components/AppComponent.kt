@@ -1,5 +1,6 @@
 package anderltda.com.br.githubaac.di.components
 
+import anderltda.com.br.githubaac.MyApp
 import anderltda.com.br.githubaac.di.modules.ActivityModule
 import anderltda.com.br.githubaac.di.modules.AppModule
 import anderltda.com.br.githubaac.di.modules.FragmentModule
@@ -27,5 +28,5 @@ interface AppComponent {
         fun build() : AppComponent
     }
 
-
+    fun inject(app: MyApp)
 }
