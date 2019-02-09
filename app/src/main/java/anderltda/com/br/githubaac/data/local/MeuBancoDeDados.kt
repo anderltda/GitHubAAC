@@ -11,7 +11,7 @@ import android.arch.persistence.room.TypeConverters
 @TypeConverters(DateConverter::class)
 abstract class MeuBancoDeDados: RoomDatabase() {
 
-    abstract  fun userDao(): UserDao
+    abstract fun userDao(): UserDao
 
     companion object {
         private val INSTANCE : MeuBancoDeDados? = null
